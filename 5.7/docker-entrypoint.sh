@@ -33,6 +33,14 @@ if [ -z "$(ls -A /var/lib/mysql)" -a "${1%_safe}" = 'mysqld' ]; then
 		fi
 	fi
 	
+        for DB in $MYSQL_DATABASES; do
+		echo "CREATE DATABASE IF NOT EXISTS $DB ;" >> "$TEMP_FILE"
+
+		for USER in $MYSQL_USERS; do
+			echo "GRANT ALL ON $DB.* TO '$USER'@'%' ;" >> "$TEMP_FILE"
+		done
+	fi
+	
 	echo 'FLUSH PRIVILEGES ;' >> "$TEMP_FILE"
 	
 	set -- "$@" --init-file="$TEMP_FILE"
