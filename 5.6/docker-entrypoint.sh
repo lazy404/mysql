@@ -32,15 +32,12 @@ if [ -z "$(ls -A /var/lib/mysql)" -a "${1%_safe}" = 'mysqld' ]; then
 			echo "GRANT ALL ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%' ;" >> "$TEMP_FILE"
 		fi
 	fi
-
-	for DB in $MYSQL_DATABASES; do
-		echo "CREATE DATABASE IF NOT EXISTS $DB ;" >> "$TEMP_FILE"
-
-		for USER in $MYSQL_USERS; do
-			echo "GRANT ALL ON $DB.* TO '$USER'@'%' ;" >> "$TEMP_FILE"
-		done
-
-	fi
+	
+	for DBS in $MYSQL_DATABASES; do
+		db=(${DBS//:/ })
+		echo "CREATE DATABASE IF NOT EXISTS ${db[0]} ;" >> "$TEMP_FILE"
+		echo "GRANT ALL ON ${db[0]}.* TO '${db[1]}'@'%' IDENTIFIED BY '${db[2]}';" >> "$TEMP_FILE"
+	done
 	
 	echo 'FLUSH PRIVILEGES ;' >> "$TEMP_FILE"
 	
